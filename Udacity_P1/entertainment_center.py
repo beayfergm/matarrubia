@@ -53,6 +53,7 @@ efalcatraz = movie.Movie(
 	"http://www.imdb.com/title/tt0079116/"
 	);
 
+# Adding all items to a list
 media_items = [];
 media_items.append(reservoir_dogs);
 media_items.append(diablo_two);
@@ -61,4 +62,5 @@ media_items.append(interstellar);
 media_items.append(fftactics);
 media_items.append(efalcatraz);
 
+# Creates an html page with all the information and opens it
 fresh_tomatoes.open_movies_page(media_items);

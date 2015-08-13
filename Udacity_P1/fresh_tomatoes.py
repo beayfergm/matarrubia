@@ -2,7 +2,10 @@ import webbrowser
 import os
 import re
 
+# Movie class name
 MOVIE_CLASS_NAME = "Movie";
+
+# Videogame class name
 VIDEOGAME_CLASS_NAME = "Videogame";
 
 # Styles and scripting for the page
@@ -162,6 +165,7 @@ movie_tile_content = '''
 </div>
 '''
 
+# A single videogame entry html template
 videogame_tile_content = '''
 <div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
     <h3>{title}</h3>
@@ -173,18 +177,19 @@ videogame_tile_content = '''
 </div>
 '''
 
+# Creates an html div containing all the information of the media item and returns it
 def create_movie_tiles_content(mediaitems):
     # The HTML content for this section of the page
     content = ''
     for media_item in mediaitems:
-
         # Default value for the item content is empty
         media_item_content = "";
 
-        # Create the content for the media item
+        # Creates the content for the media item
         # It uses the class name instead of the class type in order to
         # avoid coupling between files. Using plain strings to determine
-        # types allows us to execute the program without importing external modules.
+        # types makes this file to not have dependencies on either
+        # Movie or Videogame classes
         if(get_class_name(media_item) is MOVIE_CLASS_NAME):
             media_item_content = create_movie_content(media_item);
         elif(get_class_name(media_item) is VIDEOGAME_CLASS_NAME):
@@ -194,9 +199,11 @@ def create_movie_tiles_content(mediaitems):
         content += media_item_content;
     return content
 
+# Returns the class name of a given object
 def get_class_name(object):
     return object.__class__.__name__;
 
+# Creates a media item of type "Movie"
 def create_movie_content(movie_media_item):
     trailer_youtube_id = extract_youtube_id(movie_media_item.preview_youtube_url);
     return movie_tile_content.format(
@@ -208,6 +215,7 @@ def create_movie_content(movie_media_item):
             imdb_url=movie_media_item.imdb_url
         );
 
+# Creates a media item of type "Videogame"
 def create_videogame_content(videogame_media_item):
     trailer_youtube_id = extract_youtube_id(videogame_media_item.preview_youtube_url);
     return videogame_tile_content.format(
@@ -218,8 +226,8 @@ def create_videogame_content(videogame_media_item):
             pegi_rating_img_url=videogame_media_item.pegi_rating_img_url
         );
 
+# Extract the youtube ID from a url and returns it
 def extract_youtube_id(youtube_url):
-     # Extract the youtube ID from the url
     youtube_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url)
     youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', youtube_url)
     trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
