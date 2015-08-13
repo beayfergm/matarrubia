@@ -38,32 +38,25 @@ main_page_head = '''
         .movie-tile {
             margin-bottom: 20px;
             padding-top: 20px;
-            height: 430px;
+            height: 450px;
             bottom:0;
+            transition: transform .2s ease;
         }
         .movie-tile:hover {
-            background-color: #EEE;
+            background-color: #eaeaea;
+            cursor: pointer;
+            transform: scale(1.05);
+        }
+        .movie-url {
+            cursor: pointer;
+        }
+        .movie-url:hover {
+            background-color: #bbbbbb;
             cursor: pointer;
         }
         .movie-thumbnail {
             max-width= 220px;
-            max-height= 342px;
-        }
-        #bottom-anchor-text {
-            position: absolute;
-            bottom: 0;
-            margin-left: auto;
-            margin-right: auto;
-            left: 0;
-            right: 0;
-        }
-        #bottom-anchor-thumbnail {
-            position: absolute;
-            bottom: 60;
-            margin-left: auto;
-            margin-right: auto;
-            left: 0;
-            right: 0;
+            height= 320px;
         }
         .scale-media {
             padding-bottom: 56.25%;
@@ -77,6 +70,14 @@ main_page_head = '''
             left: 0;
             top: 0;
             background-color: white;
+        }
+        #bottom-anchor {
+            position: absolute;
+            margin-left: auto;
+            margin-right: auto;
+            left: 0;
+            right: 0;
+            bottom: 20;
         }
     </style>
     <script type="text/javascript" charset="utf-8">
@@ -96,6 +97,12 @@ main_page_head = '''
               'src': sourceUrl,
               'frameborder': 0
             }));
+        });
+        // Open IMDB link
+        $(document).on('click', '.movie-url', function (event) {
+            var imdb_url = $(this).attr('href')
+            location.href = imdb_url
+            event.stopPropagation()
         });
         // Animate in the movies when the page loads
         $(document).ready(function () {
@@ -145,21 +152,24 @@ main_page_content = '''
 # A single movie entry html template
 movie_tile_content = '''
 <div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
+    <h3>{title}</h3>
+    <h6> {actors} </h6> 
     <div class="movie-thumbnail">
-      <img id="bottom-anchor-thumbnail" src="{thumbnail_url}" width="220" max-height="342">
+      <img src="{thumbnail_url}" width="220" max-height="342">
     </div>
-    <h2 id="bottom-anchor-text">{title}</h2>
-    {actors} <br> {release_date}
-    <a href="{imdb_url}"> IMDB Page </a>
+    {release_date}
+    <a class="movie-url" href="{imdb_url}"> IMDB Page </a>
 </div>
 '''
 
 videogame_tile_content = '''
 <div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
+    <h3>{title}</h3>
+    <h6> {studio_name} </h6> 
     <div class="movie-thumbnail">
-      <img id="bottom-anchor-thumbnail" src="{thumbnail_url}" width="220" max-height="342">
+      <img src="{thumbnail_url}" width="220" max-height="342">
     </div>
-    <h2 id="bottom-anchor-text">{title}</h2>
+    <img id="bottom-anchor" src="{pegi_rating_img_url}">
 </div>
 '''
 
@@ -198,12 +208,14 @@ def create_movie_content(movie_media_item):
             imdb_url=movie_media_item.imdb_url
         );
 
-def create_videogame_content(movie_media_item):
-    trailer_youtube_id = extract_youtube_id(movie_media_item.preview_youtube_url);
+def create_videogame_content(videogame_media_item):
+    trailer_youtube_id = extract_youtube_id(videogame_media_item.preview_youtube_url);
     return videogame_tile_content.format(
-            title=movie_media_item.title,
-            thumbnail_url=movie_media_item.thumbnail_url,
-            trailer_youtube_id=trailer_youtube_id
+            title=videogame_media_item.title,
+            thumbnail_url=videogame_media_item.thumbnail_url,
+            trailer_youtube_id=trailer_youtube_id,
+            studio_name=videogame_media_item.studio_name,
+            pegi_rating_img_url=videogame_media_item.pegi_rating_img_url
         );
 
 def extract_youtube_id(youtube_url):
