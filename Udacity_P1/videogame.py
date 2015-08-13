@@ -8,9 +8,20 @@ class Videogame(MediaItem):
 	pegi_rating: PEGI rating for the item
 	'''
 
-	PEGI_RATINGS = ["P3", "P7", "P12", "P16", "P18"];
+	PEGI_RATINGS = {
+	3: "http://www.pegi.info/en/index/id/33/media/img/320.gif", 
+	7: "http://www.pegi.info/en/index/id/33/media/img/321.gif", 
+	12: "http://www.pegi.info/en/index/id/33/media/img/322.gif", 
+	16: "http://www.pegi.info/en/index/id/33/media/img/323.gif", 
+	18: "http://www.pegi.info/en/index/id/33/media/img/324.gif"
+	};
 
-	def __init__(self, title, thumbnail_url, preview_youtube_url, studio_name, pegi_rating_index):
+	def __init__(self, title, thumbnail_url, preview_youtube_url, studio_name, pegi_rating):
 		MediaItem.__init__(self, title, thumbnail_url, preview_youtube_url);
 		self.studio_name = studio_name;
-		self.pegi_rating = Videogame.PEGI_RATINGS[pegi_rating_index];
+
+		if(pegi_rating in Videogame.PEGI_RATINGS):
+			self.pegi_rating_img_url = Videogame.PEGI_RATINGS[pegi_rating];
+		else:
+			# Default PEGI is 3
+			self.pegi_rating_img_url = Videogame.PEGI_RATINGS[3];
