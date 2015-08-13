@@ -2,11 +2,14 @@ import webbrowser
 import os
 import re
 
+MOVIE_CLASS_NAME = "Movie";
+VIDEOGAME_CLASS_NAME = "Videogame";
+
 # Styles and scripting for the page
 main_page_head = '''
 <head>
     <meta charset="utf-8">
-    <title>Fresh Tomatoes!</title>
+    <title>My Media Library</title>
 
     <!-- Bootstrap 3 -->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
@@ -35,10 +38,32 @@ main_page_head = '''
         .movie-tile {
             margin-bottom: 20px;
             padding-top: 20px;
+            height: 430px;
+            bottom:0;
         }
         .movie-tile:hover {
             background-color: #EEE;
             cursor: pointer;
+        }
+        .movie-thumbnail {
+            max-width= 220px;
+            max-height= 342px;
+        }
+        #bottom-anchor-text {
+            position: absolute;
+            bottom: 0;
+            margin-left: auto;
+            margin-right: auto;
+            left: 0;
+            right: 0;
+        }
+        #bottom-anchor-thumbnail {
+            position: absolute;
+            bottom: 60;
+            margin-left: auto;
+            margin-right: auto;
+            left: 0;
+            right: 0;
         }
         .scale-media {
             padding-bottom: 56.25%;
@@ -105,7 +130,7 @@ main_page_content = '''
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Fresh Tomatoes Movie Trailers</a>
+            <a class="navbar-brand" href="#">My Media Library</a>
           </div>
         </div>
       </div>
@@ -120,34 +145,80 @@ main_page_content = '''
 # A single movie entry html template
 movie_tile_content = '''
 <div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
-    <img src="{poster_image_url}" width="220" height="342">
-    <h2>{movie_title}</h2>
+    <div class="movie-thumbnail">
+      <img id="bottom-anchor-thumbnail" src="{thumbnail_url}" width="220" max-height="342">
+    </div>
+    <h2 id="bottom-anchor-text">{title}</h2>
+    {actors} <br> {release_date}
+    <a href="{imdb_url}"> IMDB Page </a>
 </div>
 '''
 
-def create_movie_tiles_content(movies):
+videogame_tile_content = '''
+<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
+    <div class="movie-thumbnail">
+      <img id="bottom-anchor-thumbnail" src="{thumbnail_url}" width="220" max-height="342">
+    </div>
+    <h2 id="bottom-anchor-text">{title}</h2>
+</div>
+'''
+
+def create_movie_tiles_content(mediaitems):
     # The HTML content for this section of the page
     content = ''
-    for movie in movies:
-        # Extract the youtube ID from the url
-        youtube_id_match = re.search(r'(?<=v=)[^&#]+', movie.trailer_youtube_url)
-        youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', movie.trailer_youtube_url)
-        trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
+    for media_item in mediaitems:
+
+        # Default value for the item content is empty
+        media_item_content = "";
+
+        # Create the content for the media item
+        # It uses the class name instead of the class type in order to
+        # avoid coupling between files. Using plain strings to determine
+        # types allows us to execute the program without importing external modules.
+        if(get_class_name(media_item) is MOVIE_CLASS_NAME):
+            media_item_content = create_movie_content(media_item);
+        elif(get_class_name(media_item) is VIDEOGAME_CLASS_NAME):
+            media_item_content = create_videogame_content(media_item);
 
         # Append the tile for the movie with its content filled in
-        content += movie_tile_content.format(
-            movie_title=movie.title,
-            poster_image_url=movie.poster_image_url,
-            trailer_youtube_id=trailer_youtube_id
-        )
+        content += media_item_content;
     return content
 
-def open_movies_page(movies):
+def get_class_name(object):
+    return object.__class__.__name__;
+
+def create_movie_content(movie_media_item):
+    trailer_youtube_id = extract_youtube_id(movie_media_item.preview_youtube_url);
+    return movie_tile_content.format(
+            title=movie_media_item.title,
+            thumbnail_url=movie_media_item.thumbnail_url,
+            trailer_youtube_id=trailer_youtube_id,
+            actors=movie_media_item.actors,
+            release_date=movie_media_item.release_date,
+            imdb_url=movie_media_item.imdb_url
+        );
+
+def create_videogame_content(movie_media_item):
+    trailer_youtube_id = extract_youtube_id(movie_media_item.preview_youtube_url);
+    return videogame_tile_content.format(
+            title=movie_media_item.title,
+            thumbnail_url=movie_media_item.thumbnail_url,
+            trailer_youtube_id=trailer_youtube_id
+        );
+
+def extract_youtube_id(youtube_url):
+     # Extract the youtube ID from the url
+    youtube_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url)
+    youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', youtube_url)
+    trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
+    return trailer_youtube_id;
+
+def open_movies_page(mediaitems):
   # Create or overwrite the output file
   output_file = open('fresh_tomatoes.html', 'w')
 
   # Replace the placeholder for the movie tiles with the actual dynamically generated content
-  rendered_content = main_page_content.format(movie_tiles=create_movie_tiles_content(movies))
+  rendered_content = main_page_content.format(movie_tiles=create_movie_tiles_content(mediaitems))
 
   # Output the file
   output_file.write(main_page_head + rendered_content)
