@@ -1,6 +1,8 @@
 from mediaitem import MediaItem;
 
+
 class Videogame(MediaItem):
+	
 	''' 
 	Declares a Videogame object which inherits from MediaItem
 	In addition to the MediaItem class members, every videogame has:

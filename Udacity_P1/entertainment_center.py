@@ -54,13 +54,8 @@ efalcatraz = movie.Movie(
 	);
 
 # Adding all items to a list
-media_items = [];
-media_items.append(reservoir_dogs);
-media_items.append(diablo_two);
-media_items.append(jet_force_gemini);
-media_items.append(interstellar);
-media_items.append(fftactics);
-media_items.append(efalcatraz);
+media_items = [reservoir_dogs, diablo_two, jet_force_gemini, interstellar
+				fftactics, efalcatraz];
 
 # Creates an html page with all the information and opens it
 fresh_tomatoes.open_movies_page(media_items);
