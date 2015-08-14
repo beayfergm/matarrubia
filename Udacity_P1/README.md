@@ -1,10 +1,9 @@
-# Matarrubia
+# Project 1: Movie Trailer Website 
 
 ![Udacity Logo](https://lh5.ggpht.com/2Khq0jHkIOhW2VKiGOcJ97rTslkGqu0fDoI-bqrvugAoop9eAFvA_wmneVDcGpaTFDEQCja7dTRQTnHZiA=s0)
 
 This folder contains materials related with my First Udacity Full Stack Web Developer Nanodegree Project
 
-# Project 1: Movie Trailer Website 
 ### How to run the application
 
 Checkout this repository: [beayfergm/matarrubia](https://github.com/beayfergm/matarrubia)
