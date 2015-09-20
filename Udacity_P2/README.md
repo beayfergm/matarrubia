@@ -1,4 +1,4 @@
-# Project 1: Tournament Results 
+# Project 2: Tournament Results 
 
 ![Udacity Logo](https://lh5.ggpht.com/2Khq0jHkIOhW2VKiGOcJ97rTslkGqu0fDoI-bqrvugAoop9eAFvA_wmneVDcGpaTFDEQCja7dTRQTnHZiA=s0)
 
