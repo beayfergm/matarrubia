@@ -1,0 +1,5 @@
+select programs.name, count(bugs.filename) as num
+       from programs left join bugs
+         on programs.filename = bugs.filename
+       group by programs.name
+       order by num;

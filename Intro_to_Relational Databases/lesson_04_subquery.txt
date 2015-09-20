@@ -1,0 +1,6 @@
+select name, weight
+from 
+	players,
+	(select avg(weight) as av from players) as subq
+where 
+	weight < av;
