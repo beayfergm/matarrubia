@@ -27,6 +27,26 @@ CREATE TABLE matches ( tournament_id INT references tournaments(id) ON DELETE CA
 					   comments TEXT );
 
 
+-- Creating a Unique Index
+-- This index prevents two players to play agains each other twice in the same tournament
+-- Reference: http://stackoverflow.com/questions/25647360/constraint-to-avoid-combination-of-foreign-keys
+CREATE UNIQUE INDEX matches_rematch_idx
+   ON matches (tournament_id, least(winner_id, loser_id), greatest(winner_id, loser_id));
+
+
+-- Creating a view to make easier showing the Player Standings
+-- Reference (for conditional counting: http://stackoverflow.com/questions/21288458/in-redshift-postgres-how-to-count-rows-that-meet-a-condition)
+CREATE VIEW playerStandings AS 
+	SELECT 
+		players.id, players.name, COUNT(CASE WHEN players.id = matches.winner_id THEN 1 END) as wins, COUNT(*) as matches
+	FROM 
+		players join matches
+	ON 
+		players.id = matches.winner_id OR players.id = matches.loser_id
+	GROUP BY (players.id)
+	ORDER BY wins DESC;
+
+
 -- Some test insertions here, so we can avoid doing everything manually
 INSERT INTO players(name) VALUES ('Michael Jordan'); 	-- id: 1
 INSERT INTO players(name) VALUES ('Shaquille ONeal'); 	-- id: 2
