@@ -89,10 +89,13 @@ def testReportMatches():
     registerPlayer("Diane Grant")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row['id'] for row in standings]
-    reportMatch(id1, id2)
-    reportMatch(id3, id4)
+    reportMatch(1, id1, id2, 'testReportMatches1')
+    reportMatch(1, id3, id4, 'testReportMatches2')
     standings = playerStandings()
-    for (i, n, w, m) in standings:
+    for row in standings:
+        i = row["id"];
+        m = row["matches"];
+        w = row["wins"];
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if i in (id1, id3) and w != 1:
@@ -110,9 +113,9 @@ def testPairings():
     registerPlayer("Applejack")
     registerPlayer("Pinkie Pie")
     standings = playerStandings()
-    [id1, id2, id3, id4] = [row[0] for row in standings]
-    reportMatch(id1, id2)
-    reportMatch(id3, id4)
+    [id1, id2, id3, id4] = [row['id'] for row in standings]
+    reportMatch(1, id1, id2, 'testReportMatches1')
+    reportMatch(1, id3, id4, 'testReportMatches2')
     pairings = swissPairings()
     if len(pairings) != 2:
         raise ValueError(

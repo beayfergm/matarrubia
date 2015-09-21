@@ -98,13 +98,21 @@ def playerStandings():
     return playerStandings;
 
 
-def reportMatch(winner, loser):
+def reportMatch(tournament, winner, loser, comments):
     """Records the outcome of a single match between two players.
 
     Args:
-      winner:  the id number of the player who won
-      loser:  the id number of the player who lost
+      tournament: the id number of the tournament where the match took place in
+      winner: the id number of the player who won
+      loser: the id number of the player who lost
+      comments: string containing comments about the match
     """
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "INSERT INTO matches VALUES ((%s), (%s), (%s), (%s));";
+    executeQuery(databaseCursor, query, (tournament, winner, loser, comments, ));
+    databaseConnection.commit();
+    databaseConnection.close();
  
  
 def swissPairings():
