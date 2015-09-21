@@ -70,10 +70,11 @@ def testStandingsBeforeMatches():
     if len(standings[0]) != 4:
         raise ValueError("Each playerStandings row should have four columns.")
     [(id1, name1, wins1, matches1), (id2, name2, wins2, matches2)] = standings
-    if matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0:
+    print standings
+    if standings[0]['matches'] != 0 or standings[1]['matches'] != 0 or standings[0]['wins'] != 0 or standings[1]['wins'] != 0:
         raise ValueError(
             "Newly registered players should have no matches or wins.")
-    if set([name1, name2]) != set(["Melpomene Murray", "Randy Schwartz"]):
+    if set([standings[0]['name'], standings[1]['name']]) != set(["Melpomene Murray", "Randy Schwartz"]):
         raise ValueError("Registered players' names should appear in standings, "
                          "even if they have no matches played.")
     print "6. Newly registered players appear in the standings with no matches."
@@ -87,7 +88,7 @@ def testReportMatches():
     registerPlayer("Cathy Burton")
     registerPlayer("Diane Grant")
     standings = playerStandings()
-    [id1, id2, id3, id4] = [row[0] for row in standings]
+    [id1, id2, id3, id4] = [row['id'] for row in standings]
     reportMatch(id1, id2)
     reportMatch(id3, id4)
     standings = playerStandings()
