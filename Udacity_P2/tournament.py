@@ -87,6 +87,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "SELECT * FROM playerStandings;"
+    executeQuery(databaseCursor, query);
+    resultRows = databaseCursor.fetchall();
+    databaseConnection.close();
+    # Formatting output as a dictionary.
+    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'wins': row[2], 'matches': row[3]} for row in resultRows];
+    return playerStandings;
 
 
 def reportMatch(winner, loser):

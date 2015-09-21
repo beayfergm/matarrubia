@@ -38,9 +38,9 @@ CREATE UNIQUE INDEX matches_rematch_idx
 -- Reference (for conditional counting: http://stackoverflow.com/questions/21288458/in-redshift-postgres-how-to-count-rows-that-meet-a-condition)
 CREATE VIEW playerStandings AS 
 	SELECT 
-		players.id, players.name, COUNT(CASE WHEN players.id = matches.winner_id THEN 1 END) as wins, COUNT(*) as matches
+		players.id, players.name, COUNT(CASE WHEN players.id = matches.winner_id THEN 1 END) as wins, COUNT(CASE WHEN matches.tournament_id IS NOT NULL THEN 1 END) as matches
 	FROM 
-		players join matches
+		players left join matches
 	ON 
 		players.id = matches.winner_id OR players.id = matches.loser_id
 	GROUP BY (players.id)
@@ -52,6 +52,7 @@ INSERT INTO players(name) VALUES ('Michael Jordan'); 	-- id: 1
 INSERT INTO players(name) VALUES ('Shaquille ONeal'); 	-- id: 2
 INSERT INTO players(name) VALUES ('Carmelo Anthony'); 	-- id: 3
 INSERT INTO players(name) VALUES ('Stephen Curry');		-- id: 4
+INSERT INTO players(name) VALUES ('Kevin Durant');		-- id: 5
 
 INSERT INTO tournaments(name) VALUES ('NPPA Season 2014/2015'); 	-- id: 1
 INSERT INTO tournaments(name) VALUES ('NPPA Season 2015/2016'); 	-- id: 2
