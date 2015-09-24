@@ -5,71 +5,74 @@
 # Author: Fernando Matarrubia
 
 import psycopg2
+import contextlib
+
+@contextlib.contextmanager
+def get_cursor():
+    """
+    Helper function using the context lib to avoid repeating the same code when executing queries
+    Reference: Udacity first project review
+    Reference: https://docs.python.org/2/library/contextlib.html
+    Reference: http://thecodeship.com/patterns/guide-to-python-function-decorators/
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        yield cur
+    except:
+        raise
+    else:
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
 
-def executeQuery(databaseCursor, query, listOfParameters=()):
+def executeQuery(query, fetchResults, listOfParameters=()):
     """Convenience method to safely execute an sql query"""
-    if databaseCursor is None:
-        raise TypeError("psql database cursor cannot be None.")
-
-    # Using this phyton's formatting prevents sql injection attacks
-    databaseCursor.execute(query, listOfParameters);
+    results = None;
+    with get_cursor() as cursor:
+        # Using this phyton's formatting prevents sql injection attacks
+        cursor.execute(query, listOfParameters);
+        if (fetchResults):
+            results = cursor.fetchall();
+    return results;
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "DELETE FROM matches;";
-    executeQuery(databaseCursor, query);
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False);
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "DELETE FROM players;";
-    executeQuery(databaseCursor, query);
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False);
 
 
 def deleteTournaments():
     """Remove all the tournaments from the database."""
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "DELETE FROM tournaments;";
-    executeQuery(databaseCursor, query);
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False);
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "SELECT count(*) as totalPlayers FROM players;";
-    executeQuery(databaseCursor, query);
-    result = databaseCursor.fetchall();
-    databaseConnection.close();
+    result = executeQuery(query, True);
     # Result value should be the first item in the first returned row
     totalPlayers = result[0][0];
     return totalPlayers;
 
 def countTournaments():
     """Returns the number of tournaments currently registered."""
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "SELECT count(*) as totalTournaments FROM tournaments;";
-    executeQuery(databaseCursor, query);
-    result = databaseCursor.fetchall();
-    databaseConnection.close();
+    result = executeQuery(query, True);
     # Result value should be the first item in the first returned row
     totalTournaments = result[0][0];
     return totalTournaments;
@@ -86,12 +89,8 @@ def registerPlayer(name):
     """
     # Sanitizing the input before executing the query
     # This will escape or strip characters making the input safe and preventing sql injection attacks
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "INSERT INTO players (name) VALUES (%s);";
-    executeQuery(databaseCursor, query, (name,));
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False, (name,));
 
 def registerTournament(name):
     """Adds a tournament to the tournament database.
@@ -103,12 +102,8 @@ def registerTournament(name):
     """
     # Sanitizing the input before executing the query
     # This will escape or strip characters making the input safe and preventing sql injection attacks
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "INSERT INTO tournaments (name) VALUES (%s);";
-    executeQuery(databaseCursor, query, (name,));
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False, (name,));
 
 def getTournaments():
     """Returns a list of the existing tournaments.
@@ -121,13 +116,9 @@ def getTournaments():
         id: the tournament's unique id 
         name: the tournaments's name (as registered)
     """
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "SELECT * FROM tournaments;";
-    executeQuery(databaseCursor, query);
-    resultRows = databaseCursor.fetchall();
-    databaseConnection.close();
-    tournaments = [{'id': row[0], 'name': row[1]} for row in resultRows];
+    result = executeQuery(query, True);
+    tournaments = [{'id': row[0], 'name': row[1]} for row in result];
     return tournaments;
 
 def getPlayerStandings():
@@ -143,13 +134,9 @@ def getPlayerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "SELECT * FROM playerStandings;";
-    executeQuery(databaseCursor, query);
-    resultRows = databaseCursor.fetchall();
-    databaseConnection.close();
-    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in resultRows];
+    result = executeQuery(query, True);
+    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in result];
     return playerStandings;
 
 def getPlayerStandingsInTournament(tournamentId):
@@ -165,13 +152,9 @@ def getPlayerStandingsInTournament(tournamentId):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "SELECT * FROM playerStandings WHERE tournament_id = (%s)";
-    executeQuery(databaseCursor, query, (tournamentId,));
-    resultRows = databaseCursor.fetchall();
-    databaseConnection.close();
-    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in resultRows];
+    result = executeQuery(query, True, (tournamentId,));
+    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in result];
     return playerStandings;
 
 
@@ -184,12 +167,8 @@ def reportMatch(tournament, winner, loser, comments):
       loser:  the id number of the player who lost
       comments: string containing comments about the match
     """
-    databaseConnection = connect();
-    databaseCursor = databaseConnection.cursor();
     query = "INSERT INTO matches VALUES ((%s), (%s), (%s), (%s));";
-    executeQuery(databaseCursor, query, (tournament, winner, loser, comments, ));
-    databaseConnection.commit();
-    databaseConnection.close();
+    executeQuery(query, False, (tournament, winner, loser, comments, ));
  
 def createPairs(list):
     """Generator function to return a list of pairs given an existing list
