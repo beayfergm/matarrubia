@@ -42,7 +42,6 @@ vagrant=> \i tournament.sql
 
 6.- As a result of the previous command, you should see the following output (the first line won't show if you have executed this command before):
 ```
-NOTICE:  database "tournament" does not exist, skipping
 DROP DATABASE
 CREATE DATABASE
 You are now connected to database "tournament" as user "vagrant".
@@ -51,22 +50,27 @@ CREATE TABLE
 CREATE TABLE
 CREATE INDEX
 CREATE VIEW
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
-INSERT 0 1
 tournament=>
 ```
 
-6.1.- (Optional) To doublecheck that everything just worked, execute the next command (still inside the psql terminal session). You should expect the following output:
+6.1.- (Optional) There is a separate .sql file which inserts some test data into the database. You can execute it if you want, using the following command. The presented output should appear:
+```
+tournament=> \i tournament_data.sql
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+```
+
+6.2.- (Optional, after 6.1) To doublecheck that everything just worked, execute the next command (still inside the psql terminal session). You should expect the following output:
 ```
 tournament=> SELECT * FROM players;
  id |      name
@@ -89,19 +93,23 @@ tournament=> \q
 ```
 python tournament_test.py
 
+0. Old tournaments can be deleted.
 1. Old matches can be deleted.
 2. Player records can be deleted.
 3. After deleting, countPlayers() returns zero.
-4. After registering a player, countPlayers() returns 1.
-5. Players can be registered and deleted.
-6. Newly registered players appear in the standings with no matches.
-7. After a match, players have updated standings.
-8. After one match, players with one win are paired.
-9. Players weren't allowed to play a rematch.
-10. After creating two pairs of matches as part of two different tournaments, no errors raised.
+4. After deleting, countTournaments() returns zero.
+5. After registering a player, countPlayers() returns 1.
+6. After registering one tournament, countTournaments() returns 1.
+7. Players can be registered and deleted.
+8. Tournaments can be registered and deleted.
+9. Newly registered players appear in the standings with no matches.
+10. Newly registered players do not appear in an specific tournament standings with no matches.
+11. After a match, players have updated standings.
+12. After one match, players with one win are paired.
+13. Players weren't allowed to play a rematch.
+14. After creating two pairs of matches as part of two different tournaments, no errors raised.
 Success!  All tests pass!
 ```
-
 
  Enjoy!
 
