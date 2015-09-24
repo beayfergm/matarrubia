@@ -221,7 +221,7 @@ def swissPairings(tournamentId = -1):
         name2: the second player's name
     """
     # Depending on the tournamentId we need to fetch the standings in a given way
-    playerStandingsList = playerStandings() if (tournamentId == -1) else playerStandingsInTournament(tournamentId);
+    playerStandingsList = playerStandings() if (tournamentId == -1) else getPlayerStandingsInTournament(tournamentId);
     # Then, we create the pairs using a generator function
     standingPairs = createPairs(playerStandingsList);
     # Finally we build the result with the required structure and return them
