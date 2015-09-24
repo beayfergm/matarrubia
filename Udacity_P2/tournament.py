@@ -5,7 +5,6 @@
 # Author: Fernando Matarrubia
 
 import psycopg2
-import bleach
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
@@ -41,6 +40,16 @@ def deletePlayers():
     databaseConnection.close();
 
 
+def deleteTournaments():
+    """Remove all the tournaments from the database."""
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "DELETE FROM tournaments;";
+    executeQuery(databaseCursor, query);
+    databaseConnection.commit();
+    databaseConnection.close();
+
+
 def countPlayers():
     """Returns the number of players currently registered."""
     databaseConnection = connect();
@@ -52,6 +61,18 @@ def countPlayers():
     # Result value should be the first item in the first returned row
     totalPlayers = result[0][0];
     return totalPlayers;
+
+def countTournaments():
+    """Returns the number of tournaments currently registered."""
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "SELECT count(*) as totalTournaments FROM tournaments;";
+    executeQuery(databaseCursor, query);
+    result = databaseCursor.fetchall();
+    databaseConnection.close();
+    # Result value should be the first item in the first returned row
+    totalTournaments = result[0][0];
+    return totalTournaments;
 
 
 def registerPlayer(name):
@@ -65,15 +86,51 @@ def registerPlayer(name):
     """
     # Sanitizing the input before executing the query
     # This will escape or strip characters making the input safe and preventing sql injection attacks
-    sanitizedName = bleach.clean(name);
     databaseConnection = connect();
     databaseCursor = databaseConnection.cursor();
     query = "INSERT INTO players (name) VALUES (%s);";
-    executeQuery(databaseCursor, query, (sanitizedName,));
+    executeQuery(databaseCursor, query, (name,));
     databaseConnection.commit();
     databaseConnection.close();
 
-def playerStandings():
+def registerTournament(name):
+    """Adds a tournament to the tournament database.
+  
+    The database assigns a unique serial id number for the tournament.
+  
+    Args:
+      name: the tournament's name (it doesn't need to be unique).
+    """
+    # Sanitizing the input before executing the query
+    # This will escape or strip characters making the input safe and preventing sql injection attacks
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "INSERT INTO tournaments (name) VALUES (%s);";
+    executeQuery(databaseCursor, query, (name,));
+    databaseConnection.commit();
+    databaseConnection.close();
+
+def getTournaments():
+    """Returns a list of the existing tournaments.
+
+    The first entry in the list should be the player in first place, or a player
+    tied for first place if there is currently a tie.
+
+    Returns:
+      A list of tuples, each of which contains (id, name, wins, matches):
+        id: the tournament's unique id 
+        name: the tournaments's name (as registered)
+    """
+    databaseConnection = connect();
+    databaseCursor = databaseConnection.cursor();
+    query = "SELECT * FROM tournaments;";
+    executeQuery(databaseCursor, query);
+    resultRows = databaseCursor.fetchall();
+    databaseConnection.close();
+    tournaments = [{'id': row[0], 'name': row[1]} for row in resultRows];
+    return tournaments;
+
+def getPlayerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
@@ -95,7 +152,7 @@ def playerStandings():
     playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in resultRows];
     return playerStandings;
 
-def playerStandingsInTournament(tournamentId):
+def getPlayerStandingsInTournament(tournamentId):
     """Returns a list of the players and their win records, sorted by wins and filtered by tournamentId
 
     The first entry in the list should be the player in first place, or a player
