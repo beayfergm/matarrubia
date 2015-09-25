@@ -10,9 +10,7 @@ INSERT INTO players(name) VALUES ('Stephen Curry');		-- id: 4
 INSERT INTO players(name) VALUES ('Kevin Durant');		-- id: 5
 INSERT INTO players(name) VALUES ('Pau Gasol');			-- id: 6
 
-
-INSERT INTO tournaments(name) VALUES ('NPPA Season 2014/2015'); 	-- id: 1
-INSERT INTO tournaments(name) VALUES ('NPPA Season 2015/2016'); 	-- id: 2
+INSERT INTO tournaments(name) VALUES ('NPPA Season 2014/2015');
 
 INSERT INTO matches VALUES (1, 1, 2, 'Bulls vs Lakers');
 INSERT INTO matches VALUES (1, 3, 4, 'Knicks vs Warriors');

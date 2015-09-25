@@ -46,6 +46,7 @@ CREATE VIEW playerStandings AS
 	GROUP BY players.id, matches.tournament_id
 	ORDER BY wins DESC;
 
-
+-- We need to insert this test tournament to the original test suite completes successfully
+INSERT INTO tournaments(name) VALUES ('Test Udacity Tournament');	-- id: 1
 
 
