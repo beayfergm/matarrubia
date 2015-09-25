@@ -56,7 +56,7 @@ def deletePlayers():
 
 
 def deleteTournaments():
-    """Remove all the tournaments from the database."""
+    """Remove all the tournament records from the database."""
     query = "DELETE FROM tournaments;";
     executeQuery(query, False);
 
@@ -68,6 +68,7 @@ def countPlayers():
     # Result value should be the first item in the first returned row
     totalPlayers = result[0][0];
     return totalPlayers;
+
 
 def countTournaments():
     """Returns the number of tournaments currently registered."""
@@ -92,6 +93,7 @@ def registerPlayer(name):
     query = "INSERT INTO players (name) VALUES (%s);";
     executeQuery(query, False, (name,));
 
+
 def registerTournament(name):
     """Adds a tournament to the tournament database.
   
@@ -105,6 +107,7 @@ def registerTournament(name):
     query = "INSERT INTO tournaments (name) VALUES (%s);";
     executeQuery(query, False, (name,));
 
+
 def getTournaments():
     """Returns a list of the existing tournaments.
 
@@ -112,16 +115,17 @@ def getTournaments():
     tied for first place if there is currently a tie.
 
     Returns:
-      A list of tuples, each of which contains (id, name, wins, matches):
+      A list of tuples, each of which contains (id, name):
         id: the tournament's unique id 
         name: the tournaments's name (as registered)
     """
     query = "SELECT * FROM tournaments;";
     result = executeQuery(query, True);
-    tournaments = [{'id': row[0], 'name': row[1]} for row in result];
+    tournaments = [[row[0], row[1]] for row in result];
     return tournaments;
 
-def getPlayerStandings():
+
+def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
@@ -134,41 +138,53 @@ def getPlayerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    query = "SELECT * FROM playerStandings;";
-    result = executeQuery(query, True);
-    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in result];
+    query = "SELECT id, name, wins, matches FROM playerStandings;";
+    playerStandings = executeQuery(query, True);
     return playerStandings;
 
-def getPlayerStandingsInTournament(tournamentId):
+
+def playerStandingsInTournament(tournamentId):
     """Returns a list of the players and their win records, sorted by wins and filtered by tournamentId
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
 
     Returns:
-      A list of tuples, each of which contains (id, name, wins, matches):
+      A list of tuples, each of which contains (id, name, tournament_id, wins, matches):
         id: the player's unique id (assigned by the database)
         name: the player's full name (as registered)
+        tournament_id: the tournament's unique id
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
     query = "SELECT * FROM playerStandings WHERE tournament_id = (%s)";
-    result = executeQuery(query, True, (tournamentId,));
-    playerStandings = [{'id': str(row[0]), 'name': str(row[1]), 'tournament': row[2], 'wins': row[3], 'matches': row[4]} for row in result];
+    playerStandings = executeQuery(query, True, (tournamentId,));
     return playerStandings;
 
 
-def reportMatch(tournament, winner, loser, comments):
+def reportMatch(winner, loser, tournament=-1, comments=""):
     """Records the outcome of a single match between two players.
 
     Args:
-      tournament:  the id number of the tournament where the match took place in
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
+      tournament:  the id number of the tournament where the match took place in. 
+                    If -1 the first tournament int he database will be use as default.
       comments: string containing comments about the match
     """
+    # This code will use the first tournament in the database as the default tournament
+    # when reporting a match with an invalid tournament id
+    if(tournament == -1):
+        tournaments = getTournaments()
+        if (len(tournaments) == 0):
+            raise ValueError("Cannot report a match if there are no tournaments in the databse")
+            return
+        else:
+            tournament = tournaments[0][0];
+
     query = "INSERT INTO matches VALUES ((%s), (%s), (%s), (%s));";
     executeQuery(query, False, (tournament, winner, loser, comments, ));
+
  
 def createPairs(list):
     """Generator function to return a list of pairs given an existing list
@@ -179,6 +195,7 @@ def createPairs(list):
     # Yields on two values at a time and returns a tuple containing both of them
     while True:
         yield(listIterator.next(), listIterator.next())
+
  
 def swissPairings(tournamentId = -1):
     """Returns a list of pairs of players for the next round of a match. A tournamentId is optional.
@@ -200,11 +217,10 @@ def swissPairings(tournamentId = -1):
         name2: the second player's name
     """
     # Depending on the tournamentId we need to fetch the standings in a given way
-    playerStandingsList = playerStandings() if (tournamentId == -1) else getPlayerStandingsInTournament(tournamentId);
+    playerStandingsList = playerStandings() if (tournamentId == -1) else playerStandingsInTournament(tournamentId);
     # Then, we create the pairs using a generator function
     standingPairs = createPairs(playerStandingsList);
     # Finally we build the result with the required structure and return them
-    result = [{'id1': pair[0]["id"], 'name1': str(pair[0]["name"]), 'id2': pair[1]["id"], 'name2': str(pair[1]["name"])} for pair in standingPairs];
+    result = [[pair[0][0], str(pair[0][1]), pair[1][0], str(pair[1][1])] for pair in standingPairs];
     return result
-
 
