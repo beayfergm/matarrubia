@@ -17,9 +17,10 @@ This instructions assume that the user already has a configured VM, and is able 
 
 2.- Copy the following files into a folder of your choosing (this folder MUST be accesible from the VM):
 ```
-Udacity_P2/tournament_test.py
 Udacity_P2/tournament.py
 Udacity_P2/tournament.sql
+Udacity_P2/tournament_test.py
+Udacity_P2/tournament_test_updated.py
 ```
 
 3.- Open the terminal, initialize the VM and cd into your custom folder (/vagrant/tournament is the default for the previously mentioned preconfigured VM). This folder MUST contain the files copied in the previous step:
@@ -50,10 +51,11 @@ CREATE TABLE
 CREATE TABLE
 CREATE INDEX
 CREATE VIEW
+INSERT 0 1
 tournament=>
 ```
 
-6.1.- (Optional) There is a separate .sql file which inserts some test data into the database. You can execute it if you want, using the following command. The presented output should appear:
+6.1.- (**Optional**) There is a separate .sql file which inserts some test data into the database. You can execute it if you want, using the following command. The presented output should appear:
 ```
 tournament=> \i tournament_data.sql
 INSERT 0 1
@@ -67,10 +69,9 @@ INSERT 0 1
 INSERT 0 1
 INSERT 0 1
 INSERT 0 1
-INSERT 0 1
 ```
 
-6.2.- (Optional, after 6.1) To doublecheck that everything just worked, execute the next command (still inside the psql terminal session). You should expect the following output:
+6.2.- (**Optional, after 6.1**) To doublecheck that everything just worked, execute the next command (still inside the psql terminal session). You should expect the following output:
 ```
 tournament=> SELECT * FROM players;
  id |      name
@@ -89,9 +90,24 @@ tournament=> SELECT * FROM players;
 tournament=> \q
 ```
 
-8.- Execute the Unit Tests:
+8.- Execute the test suite:
 ```
 python tournament_test.py
+
+1. Old matches can be deleted.
+2. Player records can be deleted.
+3. After deleting, countPlayers() returns zero.
+4. After registering a player, countPlayers() returns 1.
+5. Players can be registered and deleted.
+6. Newly registered players appear in the standings with no matches.
+7. After a match, players have updated standings.
+8. After one match, players with one win are paired.
+Success!  All tests pass!
+```
+
+9.- (**Optional**) Execute the updated test suite:
+```
+python tournament_test_updated.py
 
 0. Old tournaments can be deleted.
 1. Old matches can be deleted.
@@ -110,6 +126,7 @@ python tournament_test.py
 14. After creating two pairs of matches as part of two different tournaments, no errors raised.
 Success!  All tests pass!
 ```
+
 
  Enjoy!
 
