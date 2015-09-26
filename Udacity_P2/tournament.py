@@ -45,19 +45,19 @@ def executeQuery(query, fetchResults, listOfParameters=()):
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    query = "DELETE FROM matches;";
+    query = "TRUNCATE matches CASCADE;";
     executeQuery(query, False);
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    query = "DELETE FROM players;";
+    query = "TRUNCATE players CASCADE;";
     executeQuery(query, False);
 
 
 def deleteTournaments():
     """Remove all the tournament records from the database."""
-    query = "DELETE FROM tournaments;";
+    query = "TRUNCATE tournaments CASCADE;";
     executeQuery(query, False);
 
 
