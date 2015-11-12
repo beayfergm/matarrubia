@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 app = Flask(__name__)
 
 from sqlalchemy import create_engine
@@ -34,6 +34,7 @@ def newMenuItem(restaurant_id):
 		newItem = MenuItem(name = request.form['name'], restaurant_id = restaurant_id)
 		session.add(newItem)
 		session.commit()
+		flash("New Menu Item Created")
 		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
 	else:
 		return render_template('newmenuitem.html', restaurant_id = restaurant_id)
@@ -42,9 +43,12 @@ def newMenuItem(restaurant_id):
 def editMenuItem(restaurant_id, menu_id):
 	if request.method == 'POST':
 		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
+		oldName = existingMenuItem.name
 		existingMenuItem.name = request.form['name']
 		session.add(existingMenuItem)
 		session.commit()
+		flashText = "Menu Item Edited. Old Item name: {0}. New Item name: {1}".format(oldName, existingMenuItem.name)
+		flash(flashText)
 		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
 	else:
 		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
@@ -54,8 +58,11 @@ def editMenuItem(restaurant_id, menu_id):
 def deleteMenuItem(restaurant_id, menu_id):
 	if request.method == 'POST':
 		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
+		deletedItemName = existingMenuItem.name
 		session.delete(existingMenuItem)
 		session.commit()
+		flashText = "Menu Item Deleted. Item name: {0}".format(deletedItemName)
+		flash(flashText)
 		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
 	else:
 		return render_template('deletemenuitem.html', restaurant_id = restaurant_id, menu_id = menu_id)
@@ -65,4 +72,5 @@ def RenderResponse(restaurant, items):
 
 if __name__ == '__main__':
 	app.debug = True
+	app.secret_key = "super_secret_key"
 	app.run(host = '0.0.0.0', port = 5000)
