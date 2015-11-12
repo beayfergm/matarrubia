@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 from sqlalchemy import create_engine
@@ -28,17 +28,37 @@ def restaurantMenu(restaurant_id):
 	output = RenderResponse(restaurant, items)
 	return output
 
-@app.route("/restaurants/<int:restaurant_id>/new/")
+@app.route("/restaurants/<int:restaurant_id>/new/", methods = ['GET', 'POST'])
 def newMenuItem(restaurant_id):
-	return "Page to create a new menu item. Restaurant: {0}. Task 1 complete!".format(restaurant_id)
+	if request.method == 'POST':
+		newItem = MenuItem(name = request.form['name'], restaurant_id = restaurant_id)
+		session.add(newItem)
+		session.commit()
+		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
+	else:
+		return render_template('newmenuitem.html', restaurant_id = restaurant_id)
 
-@app.route("/restaurants/<int:restaurant_id>/<int:menu_id>/edit/")
+@app.route("/restaurants/<int:restaurant_id>/<int:menu_id>/edit/", methods = ['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
-	return "Page to edit a menu item. Restaurant: {0}. Menu Item: {1}. Task 2 complete!".format(restaurant_id, menu_id)
+	if request.method == 'POST':
+		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
+		existingMenuItem.name = request.form['name']
+		session.add(existingMenuItem)
+		session.commit()
+		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
+	else:
+		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
+		return render_template('editmenuitem.html', restaurant_id = restaurant_id, menu_id = menu_id, item = existingMenuItem)
 
-@app.route("/restaurants/<int:restaurant_id>/<int:menu_id>/delete/")
+@app.route("/restaurants/<int:restaurant_id>/<int:menu_id>/delete/", methods = ['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
-	return "Page to delete a menu item. Restaurant: {0}. Menu Item: {1}. Task 3 complete!".format(restaurant_id, menu_id)
+	if request.method == 'POST':
+		existingMenuItem = 	session.query(MenuItem).filter_by(id = menu_id, restaurant_id = restaurant_id).one()
+		session.delete(existingMenuItem)
+		session.commit()
+		return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
+	else:
+		return render_template('deletemenuitem.html', restaurant_id = restaurant_id, menu_id = menu_id)
 
 def RenderResponse(restaurant, items):
 	return render_template('menu.html', restaurant = restaurant, items = items)
